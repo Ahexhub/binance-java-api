@@ -72,4 +72,9 @@ public class BinanceApiServiceGenerator implements ApiGenerator {
 
     }
 
+    @Override
+    public BinanceApiWebSocketClient createTestnetSocket() {
+        return new BinanceApiWebSocketClientImpl(sharedClient, true);
+    }
+
 }

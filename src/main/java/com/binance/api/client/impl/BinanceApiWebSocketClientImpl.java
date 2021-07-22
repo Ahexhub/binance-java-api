@@ -28,9 +28,16 @@ import okhttp3.WebSocket;
 public class BinanceApiWebSocketClientImpl implements BinanceApiWebSocketClient, Closeable {
 
     private final OkHttpClient client;
+    private final boolean testnet;
 
     public BinanceApiWebSocketClientImpl(OkHttpClient client) {
         this.client = client;
+        this.testnet = false;
+    }
+
+    public BinanceApiWebSocketClientImpl(OkHttpClient client, boolean testnet) {
+        this.client = client;
+        this.testnet = testnet;
     }
 
     @Override
@@ -61,9 +68,7 @@ public class BinanceApiWebSocketClientImpl implements BinanceApiWebSocketClient,
     }
 
     @Override
-    public Closeable onUserDataUpdateEvent(String listenKey, boolean testnet, BinanceApiCallback<UserDataUpdateEvent> callback) {
-        if (testnet)
-            listenKey += "_testnet";
+    public Closeable onUserDataUpdateEvent(String listenKey, BinanceApiCallback<UserDataUpdateEvent> callback) {
         return createNewWebSocket(listenKey, new BinanceApiWebSocketListener<>(callback, UserDataUpdateEvent.class));
     }
 
@@ -114,8 +119,6 @@ public class BinanceApiWebSocketClientImpl implements BinanceApiWebSocketClient,
     }
 
     private Closeable createNewWebSocket(String channel, BinanceApiWebSocketListener<?> listener) {
-        boolean testnet = channel.endsWith("_testnet");
-        if (testnet) channel = channel.replace("_testnet", "");
         String streamingUrl = String.format("%s/%s", (testnet) ? BinanceApiConfig.getTestnetStreamApiBaseUrl() : BinanceApiConfig.getStreamApiBaseUrl(), channel);
 
         Request request = new Request.Builder().url(streamingUrl).build();

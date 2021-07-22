@@ -42,7 +42,7 @@ public class BinanceApiClientFactory {
    * Creates a new synchronous/blocking REST client.
    */
   public BinanceApiRestClient newTestnetRestClient() {
-    return new BinanceApiRestClientImpl();
+    return new BinanceApiRestClientImpl(true);
   }
 
   /**
@@ -53,7 +53,7 @@ public class BinanceApiClientFactory {
   }
 
   public BinanceApiAsyncRestClient newTestnetAsyncRestClient() {
-    return new BinanceApiAsyncRestClientImpl();
+    return new BinanceApiAsyncRestClientImpl(true);
   }
 
 
@@ -76,6 +76,10 @@ public class BinanceApiClientFactory {
    */
   public BinanceApiWebSocketClient newWebSocketClient() {
     return ApiServiceGenerator.createSocket();
+  }
+
+  public BinanceApiWebSocketClient newTestnetWebSocketClient() {
+    return ApiServiceGenerator.createTestnetSocket();
   }
 
   /**

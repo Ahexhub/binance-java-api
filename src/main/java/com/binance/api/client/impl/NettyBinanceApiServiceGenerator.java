@@ -116,4 +116,9 @@ public class NettyBinanceApiServiceGenerator implements ApiGenerator {
     return new NettyBinanceApiWebSocketClientImpl(sharedWsClient);
   }
 
+  @Override
+  public BinanceApiWebSocketClient createTestnetSocket() {
+    return new NettyBinanceApiWebSocketClientImpl(sharedWsClient, true);
+  }
+
 }

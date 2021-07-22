@@ -14,14 +14,14 @@ import retrofit2.Response;
 
 public class ApiServiceGenerator {
 
-  private static ApiGenerator generator;
+  private static final ApiGenerator generator;
 
   static {
     try {
       if (Boolean.getBoolean("binance.api.use.netty")) {
-        generator = (ApiGenerator) Class.forName("com.binance.api.client.impl.NettyBinanceApiServiceGenerator").newInstance();
+        generator = (ApiGenerator) Class.forName("com.binance.api.client.impl.NettyBinanceApiServiceGenerator").getConstructor().newInstance();
       } else {
-        generator = (ApiGenerator) Class.forName("com.binance.api.client.impl.BinanceApiServiceGenerator").newInstance();
+        generator = (ApiGenerator) Class.forName("com.binance.api.client.impl.BinanceApiServiceGenerator").getConstructor().newInstance();
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -37,6 +37,10 @@ public class ApiServiceGenerator {
   }
   public static BinanceApiWebSocketClient createSocket() {
     return generator.createSocket();
+  }
+
+  public static BinanceApiWebSocketClient createTestnetSocket() {
+    return generator.createTestnetSocket();
   }
 
   /**

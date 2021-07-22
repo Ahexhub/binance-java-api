@@ -30,9 +30,16 @@ import lombok.SneakyThrows;
 public class NettyBinanceApiWebSocketClientImpl implements BinanceApiWebSocketClient {
 
   private final AsyncHttpClient client;
+  private final boolean testnet;
 
   public NettyBinanceApiWebSocketClientImpl(AsyncHttpClient client) {
     this.client = client;
+    this.testnet = false;
+  }
+
+  public NettyBinanceApiWebSocketClientImpl(AsyncHttpClient client, boolean testnet) {
+    this.client = client;
+    this.testnet = testnet;
   }
 
   @Override
@@ -64,9 +71,7 @@ public class NettyBinanceApiWebSocketClientImpl implements BinanceApiWebSocketCl
   }
 
   @Override
-  public Closeable onUserDataUpdateEvent(String listenKey, boolean testnet, BinanceApiCallback<UserDataUpdateEvent> callback) {
-    if (testnet)
-      listenKey += "_testnet";
+  public Closeable onUserDataUpdateEvent(String listenKey, BinanceApiCallback<UserDataUpdateEvent> callback) {
     return createNewWebSocket(listenKey, new NettyBinanceApiWebSocketListener<>(callback, UserDataUpdateEvent.class));
   }
 
@@ -99,13 +104,9 @@ public class NettyBinanceApiWebSocketClientImpl implements BinanceApiWebSocketCl
 
   @SneakyThrows
   private Closeable createNewWebSocket(String channel, NettyBinanceApiWebSocketListener<?> listener) {
-    boolean testnet = channel.endsWith("_testnet");
-    if (testnet) channel = channel.replace("_testnet", "");
     String streamingUrl = String.format("%s/%s", (testnet) ? BinanceApiConfig.getTestnetStreamApiBaseUrl() : BinanceApiConfig.getStreamApiBaseUrl(), channel);
     NettyWebSocket socket = this.client.prepareGet(streamingUrl).execute(new WebSocketUpgradeHandler.Builder()
-
         .addWebSocketListener(listener)
-
         .build()).get();
     return socket::sendCloseFrame;
   }

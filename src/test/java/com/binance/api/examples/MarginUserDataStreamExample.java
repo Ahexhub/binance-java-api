@@ -24,7 +24,7 @@ public class MarginUserDataStreamExample {
     BinanceApiWebSocketClient webSocketClient = factory.newWebSocketClient();
 
     // Listen for changes in the account
-    webSocketClient.onUserDataUpdateEvent(listenKey, false, response -> {
+    webSocketClient.onUserDataUpdateEvent(listenKey, response -> {
       if (response.getEventType() == UserDataUpdateEventType.ACCOUNT_UPDATE) {
         AccountUpdateEvent accountUpdateEvent = response.getAccountUpdateEvent();
         // Print new balances of every available asset

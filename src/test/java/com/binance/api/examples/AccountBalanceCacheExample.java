@@ -60,7 +60,7 @@ public class AccountBalanceCacheExample {
   private void startAccountBalanceEventStreaming(String listenKey) {
     BinanceApiWebSocketClient client = clientFactory.newWebSocketClient();
 
-    client.onUserDataUpdateEvent(listenKey, false, response -> {
+    client.onUserDataUpdateEvent(listenKey,  response -> {
       if (response.getEventType() == ACCOUNT_UPDATE) {
         // Override cached asset balances
         for (AssetBalance assetBalance : response.getAccountUpdateEvent().getBalances()) {

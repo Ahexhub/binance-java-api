@@ -61,7 +61,7 @@ public interface BinanceApiWebSocketClient {
      * @param callback  the callback to call on new events
      * @return a {@link Closeable} that allows the underlying web socket to be closed.
      */
-    Closeable onUserDataUpdateEvent(String listenKey, boolean testnet, BinanceApiCallback<UserDataUpdateEvent> callback);
+    Closeable onUserDataUpdateEvent(String listenKey, BinanceApiCallback<UserDataUpdateEvent> callback);
 
     /**
      * Open a new web socket to receive {@link TickerEvent tickerEvents} on a callback.

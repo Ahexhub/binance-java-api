@@ -9,5 +9,6 @@ public interface ApiGenerator {
 
 
   BinanceApiWebSocketClient createSocket();
+  BinanceApiWebSocketClient createTestnetSocket();
 
 }
