@@ -1,4 +1,5 @@
-# Java Binance API
+
+# Java Binance API [![](https://jitpack.io/v/Ahexhub/binance-java-api.svg)](https://jitpack.io/#Ahexhub/binance-java-api)
 
 binance-java-api is a lightweight Java library for interacting with
 the [Binance API](https://www.binance.com/restapipub.html), providing complete API coverage, and supporting synchronous
