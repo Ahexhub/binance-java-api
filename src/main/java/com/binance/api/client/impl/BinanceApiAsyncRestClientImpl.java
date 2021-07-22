@@ -1,0 +1,283 @@
+package com.binance.api.client.impl;
+
+import static java.lang.System.currentTimeMillis;
+
+import java.util.List;
+
+import com.binance.api.client.BinanceApiAsyncRestClient;
+import com.binance.api.client.BinanceApiCallback;
+import com.binance.api.client.config.BinanceApiConfig;
+import com.binance.api.client.constant.BinanceApiConstants;
+import com.binance.api.client.domain.TimeInForce;
+import com.binance.api.client.domain.account.Account;
+import com.binance.api.client.domain.account.DepositAddress;
+import com.binance.api.client.domain.account.DepositHistory;
+import com.binance.api.client.domain.account.DustTransferResponse;
+import com.binance.api.client.domain.account.NewOrder;
+import com.binance.api.client.domain.account.NewOrderResponse;
+import com.binance.api.client.domain.account.OcoOrderResponse;
+import com.binance.api.client.domain.account.Order;
+import com.binance.api.client.domain.account.Trade;
+import com.binance.api.client.domain.account.TradeHistoryItem;
+import com.binance.api.client.domain.account.WithdrawHistory;
+import com.binance.api.client.domain.account.WithdrawResult;
+import com.binance.api.client.domain.account.request.AllOrdersRequest;
+import com.binance.api.client.domain.account.request.CancelOrderRequest;
+import com.binance.api.client.domain.account.request.CancelOrderResponse;
+import com.binance.api.client.domain.account.request.OrderRequest;
+import com.binance.api.client.domain.account.request.OrderStatusRequest;
+import com.binance.api.client.domain.event.ListenKey;
+import com.binance.api.client.domain.general.Asset;
+import com.binance.api.client.domain.general.ExchangeInfo;
+import com.binance.api.client.domain.general.ServerTime;
+import com.binance.api.client.domain.market.AggTrade;
+import com.binance.api.client.domain.market.BookTicker;
+import com.binance.api.client.domain.market.Candlestick;
+import com.binance.api.client.domain.market.CandlestickInterval;
+import com.binance.api.client.domain.market.OrderBook;
+import com.binance.api.client.domain.market.TickerPrice;
+import com.binance.api.client.domain.market.TickerStatistics;
+
+/**
+ * Implementation of Binance's REST API using Retrofit with asynchronous/non-blocking method calls.
+ */
+public class BinanceApiAsyncRestClientImpl implements BinanceApiAsyncRestClient {
+
+    private final BinanceApiService binanceApiService;
+
+    public BinanceApiAsyncRestClientImpl() {
+        binanceApiService = ApiServiceGenerator.createService(BinanceApiService.class);
+    }
+
+    public BinanceApiAsyncRestClientImpl(boolean testnet) {
+        if (testnet)
+            binanceApiService = ApiServiceGenerator.createTestnetService(BinanceApiService.class);
+        else binanceApiService = ApiServiceGenerator.createService(BinanceApiService.class);
+
+    }
+
+    // General endpoints
+
+    @Override
+    public void ping(BinanceApiCallback<Void> callback) {
+        binanceApiService.ping().enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getServerTime(BinanceApiCallback<ServerTime> callback) {
+        binanceApiService.getServerTime().enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getExchangeInfo(BinanceApiCallback<ExchangeInfo> callback) {
+        binanceApiService.getExchangeInfo().enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getAllAssets(BinanceApiCallback<List<Asset>> callback) {
+        binanceApiService.getAllAssets(BinanceApiConfig.getAssetInfoApiBaseUrl() + "assetWithdraw/getAllAsset.html")
+                .enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    // Market Data endpoints
+
+    @Override
+    public void getOrderBook(String symbol, Integer limit, BinanceApiCallback<OrderBook> callback) {
+        binanceApiService.getOrderBook(symbol, limit).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getTrades(String symbol, Integer limit, BinanceApiCallback<List<TradeHistoryItem>> callback) {
+        binanceApiService.getTrades(symbol, limit).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getHistoricalTrades(String symbol, Integer limit, Long fromId, BinanceApiCallback<List<TradeHistoryItem>> callback) {
+        binanceApiService.getHistoricalTrades(symbol, limit, fromId).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getAggTrades(String symbol, String fromId, Integer limit, Long startTime, Long endTime, BinanceApiCallback<List<AggTrade>> callback) {
+        binanceApiService.getAggTrades(symbol, fromId, limit, startTime, endTime).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getAggTrades(String symbol, BinanceApiCallback<List<AggTrade>> callback) {
+        getAggTrades(symbol, null, null, null, null, callback);
+    }
+
+    @Override
+    public void getCandlestickBars(String symbol, CandlestickInterval interval, Integer limit, Long startTime, Long endTime, BinanceApiCallback<List<Candlestick>> callback) {
+        binanceApiService.getCandlestickBars(symbol, interval.getIntervalId(), limit, startTime, endTime).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getCandlestickBars(String symbol, CandlestickInterval interval, BinanceApiCallback<List<Candlestick>> callback) {
+        getCandlestickBars(symbol, interval, null, null, null, callback);
+    }
+
+    @Override
+    public void get24HrPriceStatistics(String symbol, BinanceApiCallback<TickerStatistics> callback) {
+        binanceApiService.get24HrPriceStatistics(symbol).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getAll24HrPriceStatistics(BinanceApiCallback<List<TickerStatistics>> callback) {
+        binanceApiService.getAll24HrPriceStatistics().enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getAllPrices(BinanceApiCallback<List<TickerPrice>> callback) {
+        binanceApiService.getLatestPrices().enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getPrice(String symbol, BinanceApiCallback<TickerPrice> callback) {
+        binanceApiService.getLatestPrice(symbol).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getBookTickers(BinanceApiCallback<List<BookTicker>> callback) {
+        binanceApiService.getBookTickers().enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void newOrder(String apiKey, String secret, NewOrder order, BinanceApiCallback<NewOrderResponse> callback) {
+        if (order.getQuoteOrderQty() == null) {
+            binanceApiService.newOrder(order.getSymbol(), order.getSide(), order.getType(),
+                    order.getTimeInForce(), order.getQuantity(), order.getPrice(),
+                    order.getNewClientOrderId(), order.getStopPrice(), order.getIcebergQty(), order.getNewOrderRespType(),
+                    order.getRecvWindow(), order.getTimestamp(), apiKey, secret).enqueue(new BinanceApiCallbackAdapter<>(callback));
+        } else {
+            binanceApiService.newOrderQuoteQty(order.getSymbol(), order.getSide(), order.getType(),
+                    order.getTimeInForce(), order.getQuoteOrderQty(), order.getPrice(),
+                    order.getNewClientOrderId(), order.getStopPrice(), order.getIcebergQty(), order.getNewOrderRespType(),
+                    order.getRecvWindow(), order.getTimestamp()).enqueue(new BinanceApiCallbackAdapter<>(callback));
+        }
+    }
+
+    @Override
+    public void newOcoOrder(String apiKey, String secret, NewOrder order, BinanceApiCallback<OcoOrderResponse> callback) {
+        binanceApiService
+                .newOcoOrder(order.getSymbol(), order.getNewClientOrderId(), order.getSide(), order.getQuantity(), order.getLimitClientOrderId(),
+                        order.getPrice(), order.getIcebergQty(), order.getStopClientOrderId(), order.getStopPrice(), order.getStopLimitPrice(),
+                        TimeInForce.GTC, order.getNewOrderRespType(), order.getRecvWindow(), order.getTimestamp(), apiKey, secret)
+                .enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void newOrderTest(String apiKey, String secret, NewOrder order, BinanceApiCallback<Void> callback) {
+        binanceApiService.newOrderTest(order.getSymbol(), order.getSide(), order.getType(),
+                order.getTimeInForce(), order.getQuantity(), order.getPrice(), order.getNewClientOrderId(), order.getStopPrice(),
+                order.getIcebergQty(), order.getNewOrderRespType(), order.getRecvWindow(), order.getTimestamp(), apiKey, secret).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    // Account endpoints
+
+    @Override
+    public void getOrderStatus(String apiKey, String secret, OrderStatusRequest orderStatusRequest, BinanceApiCallback<Order> callback) {
+        binanceApiService.getOrderStatus(orderStatusRequest.getSymbol(),
+                orderStatusRequest.getOrderId(), orderStatusRequest.getOrigClientOrderId(),
+                orderStatusRequest.getRecvWindow(), orderStatusRequest.getTimestamp(), apiKey, secret).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void cancelOrder(String apiKey, String secret, CancelOrderRequest cancelOrderRequest, BinanceApiCallback<CancelOrderResponse> callback) {
+        binanceApiService.cancelOrder(cancelOrderRequest.getSymbol(),
+                cancelOrderRequest.getOrderId(), cancelOrderRequest.getOrigClientOrderId(), cancelOrderRequest.getNewClientOrderId(),
+                cancelOrderRequest.getRecvWindow(), cancelOrderRequest.getTimestamp(), apiKey, secret).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void cancelOcoOrder(String apiKey, String secret, CancelOrderRequest cancelOrderRequest, BinanceApiCallback<OcoOrderResponse> callback) {
+        binanceApiService.cancelOcoOrder(cancelOrderRequest.getSymbol(),
+                cancelOrderRequest.getOrderId(), cancelOrderRequest.getOrigClientOrderId(), cancelOrderRequest.getNewClientOrderId(),
+                cancelOrderRequest.getRecvWindow(), cancelOrderRequest.getTimestamp(), apiKey, secret).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getOpenOrders(String apiKey, String secret, OrderRequest orderRequest, BinanceApiCallback<List<Order>> callback) {
+        binanceApiService.getOpenOrders(orderRequest.getSymbol(),
+                orderRequest.getRecvWindow(), orderRequest.getTimestamp(), apiKey, secret).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getAllOrders(String apiKey, String secret, AllOrdersRequest orderRequest, BinanceApiCallback<List<Order>> callback) {
+        binanceApiService.getAllOrders(orderRequest.getSymbol(),
+                orderRequest.getOrderId(), orderRequest.getLimit(),
+                orderRequest.getRecvWindow(), orderRequest.getTimestamp(), apiKey, secret).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getAccount(String apiKey, String secret, Long recvWindow, Long timestamp, BinanceApiCallback<Account> callback) {
+        binanceApiService.getAccount(recvWindow, timestamp, apiKey, secret).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getAccount(String apiKey, String secret, BinanceApiCallback<Account> callback) {
+        long timestamp = System.currentTimeMillis();
+        binanceApiService.getAccount(BinanceApiConstants.DEFAULT_RECEIVING_WINDOW, timestamp, apiKey, secret).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getMyTrades(String apiKey, String secret, String symbol, Integer limit, Long fromId, Long recvWindow, Long timestamp, BinanceApiCallback<List<Trade>> callback) {
+        binanceApiService.getMyTrades(symbol, limit, fromId, recvWindow, timestamp, apiKey, secret).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getMyTrades(String apiKey, String secret, String symbol, Integer limit, BinanceApiCallback<List<Trade>> callback) {
+        getMyTrades(apiKey, secret, symbol, limit, null, BinanceApiConstants.DEFAULT_RECEIVING_WINDOW, System.currentTimeMillis(), callback);
+    }
+
+    @Override
+    public void getMyTrades(String apiKey, String secret, String symbol, BinanceApiCallback<List<Trade>> callback) {
+        getMyTrades(apiKey, secret, symbol, null, null, BinanceApiConstants.DEFAULT_RECEIVING_WINDOW, System.currentTimeMillis(), callback);
+    }
+
+    @Override
+    public void withdraw(String apiKey, String secret, String asset, String address, String amount, String name, String addressTag, BinanceApiCallback<WithdrawResult> callback) {
+        binanceApiService.withdraw(asset, address, amount, name, addressTag, BinanceApiConstants.DEFAULT_RECEIVING_WINDOW, System.currentTimeMillis(), apiKey, secret)
+                .enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getDepositHistory(String apiKey, String secret, String asset, BinanceApiCallback<DepositHistory> callback) {
+        binanceApiService.getDepositHistory(asset, BinanceApiConstants.DEFAULT_RECEIVING_WINDOW, System.currentTimeMillis(), apiKey, secret)
+                .enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getWithdrawHistory(String apiKey, String secret, String asset, BinanceApiCallback<WithdrawHistory> callback) {
+        binanceApiService.getWithdrawHistory(asset, BinanceApiConstants.DEFAULT_RECEIVING_WINDOW, System.currentTimeMillis(), apiKey, secret)
+                .enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void getDepositAddress(String apiKey, String secret, String asset, BinanceApiCallback<DepositAddress> callback) {
+        binanceApiService.getDepositAddress(asset, BinanceApiConstants.DEFAULT_RECEIVING_WINDOW, System.currentTimeMillis(), apiKey, secret)
+                .enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void convertDustToBnb(String apiKey, String secret, List<String> assets, BinanceApiCallback<DustTransferResponse> callback) {
+        binanceApiService.dustTransfer(assets, BinanceApiConstants.DEFAULT_RECEIVING_WINDOW, currentTimeMillis(), apiKey, secret)
+                .enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    // User stream endpoints
+
+    @Override
+    public void startUserDataStream(String api, BinanceApiCallback<ListenKey> callback) {
+        binanceApiService.startUserDataStream(api).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void keepAliveUserDataStream(String api, String listenKey, BinanceApiCallback<Void> callback) {
+        binanceApiService.keepAliveUserDataStream(listenKey, api).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+
+    @Override
+    public void closeUserDataStream(String api, String listenKey, BinanceApiCallback<Void> callback) {
+        binanceApiService.closeAliveUserDataStream(listenKey, api).enqueue(new BinanceApiCallbackAdapter<>(callback));
+    }
+}
