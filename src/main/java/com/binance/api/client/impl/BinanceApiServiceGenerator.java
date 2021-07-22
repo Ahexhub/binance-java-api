@@ -2,6 +2,8 @@ package com.binance.api.client.impl;
 
 import java.util.concurrent.TimeUnit;
 
+import com.binance.api.client.constant.BinanceApiConstants;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.apache.commons.lang3.StringUtils;
 
 import com.binance.api.client.BinanceApiWebSocketClient;
@@ -38,7 +40,9 @@ public class BinanceApiServiceGenerator implements ApiGenerator {
         // `adaptedClient` will use its own interceptor, but share thread pool etc with
         // the 'parent' client
         AuthenticationInterceptor interceptor = new AuthenticationInterceptor();
-        OkHttpClient adaptedClient = sharedClient.newBuilder().addInterceptor(interceptor).build();
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(BinanceApiConstants.LOG_LEVEL);
+        OkHttpClient adaptedClient = sharedClient.newBuilder().addInterceptor(interceptor).addInterceptor(logging).build();
         retrofitBuilder.client(adaptedClient);
 
         Retrofit retrofit = retrofitBuilder.build();
