@@ -42,7 +42,7 @@ This repoository is created because the original library required to create a se
 <dependency>
   <groupId>com.github.Ahexhub</groupId>
   <artifactId>binance-java-api</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.2</version>
 </dependency>
 ```
 <br>**Gradle** in your build.gradle
@@ -62,7 +62,7 @@ allprojects {
 2.Add the dependency
 
 ```
-implementation 'com.github.Ahexhub:binance-java-api:1.0.0'
+implementation 'com.github.Ahexhub:binance-java-api:1.1.2'
 ```
 
 <br><br>Alternatively, you can clone this repository and run
