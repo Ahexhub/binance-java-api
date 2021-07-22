@@ -18,7 +18,7 @@ public class BinanceApiConstants {
    */
   public static final String ENDPOINT_SECURITY_TYPE_APIKEY = "APIKEY";
   public static final String ENDPOINT_SECURITY_TYPE_APIKEY_HEADER = ENDPOINT_SECURITY_TYPE_APIKEY + ": #";
-  public static final HttpLoggingInterceptor.Level LOG_LEVEL = HttpLoggingInterceptor.Level.NONE;
+  public static HttpLoggingInterceptor.Level LOG_LEVEL = HttpLoggingInterceptor.Level.NONE;
 
   /**
    * Decorator to indicate that an endpoint requires a signature.
