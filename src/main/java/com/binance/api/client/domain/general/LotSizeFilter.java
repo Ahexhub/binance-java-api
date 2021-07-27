@@ -21,11 +21,9 @@ public class LotSizeFilter extends SymbolFilter {
   }
 
   public int getPrecisionCount() {
-    val stepSize = (int) Double.parseDouble(getStepSize());
-    if (stepSize >= 1) return 0;
-    DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-    df.setMaximumFractionDigits(340);
-    return df.format(Double.parseDouble("1")).replace("0.", "").length();
+    if (stepSize.startsWith("1"))
+      return 0;
+    return stepSize.split("1")[0].replace("0.", "").length() +1;
   }
 
 }
