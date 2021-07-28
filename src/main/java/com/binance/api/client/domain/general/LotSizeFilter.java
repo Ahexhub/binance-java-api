@@ -23,7 +23,7 @@ public class LotSizeFilter extends SymbolFilter {
   public int getPrecisionCount() {
     if (stepSize.startsWith("1"))
       return 0;
-    return stepSize.split("1")[0].replace("0.", "").length() +1;
+    return stepSize.split("1")[0].replace("0.", "").length();
   }
 
 }
